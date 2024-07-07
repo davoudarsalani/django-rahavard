@@ -1,0 +1,8 @@
+*egg-info
+*pycache*
+.env
+build
+dist
+tmp
+todo
+venv
