@@ -6,7 +6,6 @@ from datetime import datetime
 from getpass import getpass
 from json import dumps
 from os import listdir, path, remove, stat, walk
-from pathlib import Path
 from shutil import rmtree
 from signal import SIGINT, signal
 from subprocess import run
@@ -35,10 +34,12 @@ ACTION_OPTIONS = [
     'dumpdata',
     'collectstatic',
     'check-deploy',
+
     'renew',
     'update',
     'check-trace',
 
+    ## only on log analyzer
     'backup',
     'storage',
     'parse',
@@ -164,12 +165,10 @@ class Command(BaseCommand):
         if action not in ACTION_OPTIONS:
             return abort(self, 'invalid action')
 
-        ABSOLUTE_PATH = Path(__file__).resolve()        ## .../PROJECT_SLUG/commands/management/commands/actions.py
-        PARENT_DIR    = ABSOLUTE_PATH.parent            ## .../PROJECT_SLUG/commands/management/commands
-        ERROR_FILE    = f'{PARENT_DIR}/error-{action}'  ## .../PROJECT_SLUG/commands/management/commands/error-backup
-
         command = get_command(full_path=__file__, drop_extention=True)
 
+        ERROR_FILE = f'{settings.PROJECT_DIR}/{command}-error-{action}'
+        ## .../PROJECT_SLUG/actions-error-backup
 
         if action in ['dumpdata', 'collectstatic', 'check-deploy']:
             try:
