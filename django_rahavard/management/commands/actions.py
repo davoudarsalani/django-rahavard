@@ -207,7 +207,9 @@ class Command(BaseCommand):
         ## -----------------------------------
         elif action == 'check-trace':
             cmd = run(
-                f'curl -v -X TRACE {settings.TARCE_URL} 2>&1',
+                ## --connect-timeout and --max-time:
+                ## https://unix.stackexchange.com/a/94612
+                f'curl -v -X TRACE --connect-timeout 20 --max-time 60 {settings.TARCE_URL} 2>&1',
                 shell=True,
                 universal_newlines=True,
                 capture_output=True,
