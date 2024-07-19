@@ -6,7 +6,9 @@ from datetime import datetime
 from os import path, makedirs, remove
 from time import sleep
 
+from natsort import natsorted
 from rahavard import (
+    contains_ymd,
     get_list_of_files,
     to_tilda,
 )
@@ -46,6 +48,7 @@ class Command(dumpdata.Command):
         ymdhms = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
         extension = 'json'
 
+        ## JUMP_1
         output_file = f'{settings.FIXTURES_DIR}/{settings.HOST_NAME}-{ymdhms}{apps_string}.{extension}'
         print(f'dumping to: {to_tilda(output_file)}')
 
@@ -75,6 +78,15 @@ class Command(dumpdata.Command):
 
         print('getting list of already present fixtures')
         fixtures = get_list_of_files(directory=settings.FIXTURES_DIR, extension=extension)
+        fixtures = natsorted([
+            _ for _ in fixtures
+            if all([
+                ## exclude non-fixtures
+                ## by making sure file names match pattern in JUMP_1
+                settings.HOST_NAME in _,
+                contains_ymd(_),
+            ])
+        ])
         print(f'  count: {len(fixtures)}')
 
         ## 24: crontab is configured to generate fixtures every hour
