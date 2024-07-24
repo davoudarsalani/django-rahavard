@@ -400,7 +400,7 @@ class Command(BaseCommand):
 
             with open(settings.STORAGE_FILE, 'w') as opened:
                 dumped = dumps(dic, indent=2)
-                opened.write(dumped)
+                opened.write(dumped + '\n')
         ## -----------------------------------
         elif action == 'parse':
             if not batch:
