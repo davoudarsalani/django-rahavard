@@ -498,6 +498,7 @@ class Command(BaseCommand):
                     if is_allowed('parse-routerboard',   only, exclude): call_command('parse-routerboard',   **parse_switches)
                     if is_allowed('parse-squid',         only, exclude): call_command('parse-squid',         **parse_switches)
                     if is_allowed('parse-useraudit',     only, exclude): call_command('parse-useraudit',     **parse_switches)
+                    if is_allowed('parse-usernotice',    only, exclude): call_command('parse-usernotice',    **parse_switches)
                     if is_allowed('parse-userwarning',   only, exclude): call_command('parse-userwarning',   **parse_switches)
                     if is_allowed('parse-vmware',        only, exclude): call_command('parse-vmware',        **parse_switches)
                 elif batch == 'two':
