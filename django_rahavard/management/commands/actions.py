@@ -490,6 +490,7 @@ class Command(BaseCommand):
             try:
                 if batch == 'one':
                     ## NOTE do NOT if -> elif
+
                     if is_allowed('parse-switch',        only, exclude): call_command('parse-switch',        **parse_switches)
                     if is_allowed('parse-windowsserver', only, exclude): call_command('parse-windowsserver', **parse_switches)
                     if is_allowed('parse-daemon',        only, exclude): call_command('parse-daemon',        **parse_switches)
@@ -501,17 +502,23 @@ class Command(BaseCommand):
                     if is_allowed('parse-usernotice',    only, exclude): call_command('parse-usernotice',    **parse_switches)
                     if is_allowed('parse-userwarning',   only, exclude): call_command('parse-userwarning',   **parse_switches)
                     if is_allowed('parse-vmware',        only, exclude): call_command('parse-vmware',        **parse_switches)
+                    if is_allowed('parse-general',       only, exclude): call_command('parse-general',       **parse_switches)
+                    ## -----------------
+                  # if is_allowed('rotate', only, exclude): call_command('rotate')
                 elif batch == 'two':
                     ## NOTE do NOT if -> elif
-                    if is_allowed('fetch-malicious',     only, exclude): call_command('fetch-malicious')                  ## NOTE keep above dns
-                    if is_allowed('parse-snort',         only, exclude): call_command('parse-snort',   **parse_switches)  ## <--,-- NOTE keep above dhcp and dns
-                    if is_allowed('update-snort',        only, exclude): call_command('update-snort')                     ## <--'
-                    if is_allowed('parse-dhcp',          only, exclude): call_command('parse-dhcp',    **parse_switches)  ## <--,-- NOTE keep below snort
-                  # if is_allowed('update-dhcp',         only, exclude): call_command('update-dhcp')                      ## <--'
-                    if is_allowed('parse-dns',           only, exclude): call_command('parse-dns',     **parse_switches)  ## NOTE keep below snort and malicious
-                    if is_allowed('update-dns',          only, exclude): call_command('update-dns')
-                    if is_allowed('parse-general',       only, exclude): call_command('parse-general', **parse_switches)
-                    ## -----------------
-                  # if is_allowed('rotate',              only, exclude): call_command('rotate')
+
+                    ## NOTE keep above dhcp and dns
+                    if is_allowed('parse-snort',  only, exclude): call_command('parse-snort', **parse_switches)
+                    if is_allowed('update-snort', only, exclude): call_command('update-snort')
+
+                    ## NOTE keep below snort
+                    if is_allowed('parse-dhcp',  only, exclude): call_command('parse-dhcp', **parse_switches)
+                  # if is_allowed('update-dhcp', only, exclude): call_command('update-dhcp')
+
+                    ## NOTE keep below snort and malicious
+                    if is_allowed('fetch-malicious', only, exclude): call_command('fetch-malicious')
+                    if is_allowed('parse-dns',       only, exclude): call_command('parse-dns', **parse_switches)
+                    if is_allowed('update-dns',      only, exclude): call_command('update-dns')
             except Exception as exc:
                 log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
