@@ -509,6 +509,7 @@ class Command(BaseCommand):
                     ## NOTE do NOT if -> elif
 
                     ## NOTE keep above dhcp and dns
+                    if is_allowed('fetch-cidr',   only, exclude): call_command('fetch-cidr')
                     if is_allowed('parse-snort',  only, exclude): call_command('parse-snort', **parse_switches)
                     if is_allowed('update-snort', only, exclude): call_command('update-snort')
 
