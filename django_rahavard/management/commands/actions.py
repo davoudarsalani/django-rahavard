@@ -415,7 +415,7 @@ class Command(BaseCommand):
                 demo,
                 batch == 'one',
             ]):
-                if clean_demo  :
+                if clean_demo:
                     ## STEP 1
                     if path.exists(settings.LOGS_DIR):
                         try:
@@ -486,40 +486,49 @@ class Command(BaseCommand):
                     log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
 
 
-            ## JUMP_1
-            try:
-                if batch == 'one':
-                    ## NOTE do NOT if -> elif
-
-                    if is_allowed('parse-switch',        only, exclude): call_command('parse-switch',        **parse_switches)
-                    if is_allowed('parse-windowsserver', only, exclude): call_command('parse-windowsserver', **parse_switches)
-                    if is_allowed('parse-daemon',        only, exclude): call_command('parse-daemon',        **parse_switches)
-                    if is_allowed('parse-filterlog',     only, exclude): call_command('parse-filterlog',     **parse_switches)
-                    if is_allowed('parse-router',        only, exclude): call_command('parse-router',        **parse_switches)
-                    if is_allowed('parse-routerboard',   only, exclude): call_command('parse-routerboard',   **parse_switches)
-                    if is_allowed('parse-squid',         only, exclude): call_command('parse-squid',         **parse_switches)
-                    if is_allowed('parse-useraudit',     only, exclude): call_command('parse-useraudit',     **parse_switches)
-                    if is_allowed('parse-usernotice',    only, exclude): call_command('parse-usernotice',    **parse_switches)
-                    if is_allowed('parse-userwarning',   only, exclude): call_command('parse-userwarning',   **parse_switches)
-                    if is_allowed('parse-vmware',        only, exclude): call_command('parse-vmware',        **parse_switches)
-                    if is_allowed('parse-general',       only, exclude): call_command('parse-general',       **parse_switches)
-                    ## -----------------
-                  # if is_allowed('rotate', only, exclude): call_command('rotate')
-                elif batch == 'two':
-                    ## NOTE do NOT if -> elif
-
+            if batch == 'one':
+                rows = [
+                    ('parse-switch',        True),
+                    ('parse-windowsserver', True),
+                    ('parse-daemon',        True),
+                    ('parse-filterlog',     True),
+                    ('parse-router',        True),
+                    ('parse-routerboard',   True),
+                    ('parse-squid',         True),
+                    ('parse-useraudit',     True),
+                    ('parse-usernotice',    True),
+                    ('parse-userwarning',   True),
+                    ('parse-vmware',        True),
+                    ('parse-general',       True),
+                ]
+            elif batch == 'two':
+                rows = [
                     ## NOTE keep above dhcp and dns
-                    if is_allowed('fetch-cidr',   only, exclude): call_command('fetch-cidr')
-                    if is_allowed('parse-snort',  only, exclude): call_command('parse-snort', **parse_switches)
-                    if is_allowed('update-snort', only, exclude): call_command('update-snort')
+                    ('fetch-cidr',   False),
+                    ('parse-snort',  True),
+                    ('update-snort', False),
 
                     ## NOTE keep below snort
-                    if is_allowed('parse-dhcp',  only, exclude): call_command('parse-dhcp', **parse_switches)
-                  # if is_allowed('update-dhcp', only, exclude): call_command('update-dhcp')
+                    ('parse-dhcp',  True),
+                    # ('update-dhcp', False),
 
-                    ## NOTE keep below snort and malicious
-                    if is_allowed('fetch-malicious', only, exclude): call_command('fetch-malicious')
-                    if is_allowed('parse-dns',       only, exclude): call_command('parse-dns', **parse_switches)
-                    if is_allowed('update-dns',      only, exclude): call_command('update-dns')
-            except Exception as exc:
-                log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
+                    ## NOTE keep below snort
+                    ('fetch-malicious', False),
+                    ('parse-dns',       True),
+                    ('update-dns',      False),
+
+                    ('rotate', False),
+                ]
+
+            ## JUMP_1
+            for command_name, uses_parse_switches in rows:
+                if not is_allowed(command_name, only, exclude):
+                    continue
+
+                try:
+                    if uses_parse_switches:
+                        call_command(command_name, **parse_switches)
+                    else:
+                        call_command(command_name)
+                except Exception as exc:
+                    log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
