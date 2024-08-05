@@ -517,7 +517,7 @@ class Command(BaseCommand):
                     ('parse-dns',       True),
                     ('update-dns',      False),
 
-                    ('rotate', False),
+                    # ('rotate', False),
                 ]
 
             ## JUMP_1
