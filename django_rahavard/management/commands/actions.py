@@ -500,7 +500,6 @@ class Command(BaseCommand):
                     ('parse-usernotice',    True),
                     ('parse-userwarning',   True),
                     ('parse-vmware',        True),
-                    ('parse-general',       True),
                 ]
             elif batch == 'two':
                 rows = [
