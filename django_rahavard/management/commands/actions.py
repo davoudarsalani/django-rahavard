@@ -43,6 +43,7 @@ ACTION_OPTIONS = [
     'backup',
     'storage',
     'parse',
+    'hourly-parse',
 ]
 BATCH_OPTIONS = [
     'one',
@@ -530,5 +531,30 @@ class Command(BaseCommand):
                         call_command(command_name, **parse_switches)
                     else:
                         call_command(command_name)
+                except Exception as exc:
+                    log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
+        ## -----------------------------------
+        elif action == 'hourly-parse':
+            for command_name in [
+                'hourly-parse-daemon',
+                'hourly-parse-dhcp',
+                'hourly-parse-dns',
+                'hourly-parse-filterlog',
+                'hourly-parse-router',
+                'hourly-parse-routerboard',
+                'hourly-parse-snort',
+                'hourly-parse-squid',
+                'hourly-parse-switch',
+                'hourly-parse-useraudit',
+                'hourly-parse-usernotice',
+                'hourly-parse-userwarning',
+                'hourly-parse-vmware',
+                'hourly-parse-windowsserver',
+            ]:
+                if not is_allowed(command_name, only, exclude):
+                    continue
+
+                try:
+                    call_command(command_name)
                 except Exception as exc:
                     log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
