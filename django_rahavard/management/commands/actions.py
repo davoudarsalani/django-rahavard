@@ -535,13 +535,19 @@ class Command(BaseCommand):
         ## -----------------------------------
         elif action == 'hourly-parse':
             for command_name in [
-                'hourly-parse-daemon',
+                ## NOTE keep above dhcp and dns
+                'hourly-parse-snort',
+
+                ## NOTE keep below snort
                 'hourly-parse-dhcp',
+
+                ## NOTE keep below snort
                 'hourly-parse-dns',
+
+                'hourly-parse-daemon',
                 'hourly-parse-filterlog',
                 'hourly-parse-router',
                 'hourly-parse-routerboard',
-                'hourly-parse-snort',
                 'hourly-parse-squid',
                 'hourly-parse-switch',
                 'hourly-parse-useraudit',
