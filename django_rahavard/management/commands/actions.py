@@ -22,6 +22,7 @@ from rahavard import (
     contains_ymd,
     is_ymd,
     get_command,
+    get_command_log_file,
     get_list_of_files,
     is_allowed,
     keyboard_interrupt_handler,
@@ -168,8 +169,8 @@ class Command(BaseCommand):
 
         command = get_command(full_path=__file__, drop_extention=True)
 
-        ERROR_FILE = f'{settings.PROJECT_DIR}/{command}-error-{action}'
-        ## .../PROJECT_SLUG/actions-error-backup
+        ERROR_FILE = get_command_log_file(f'{command}--{action}')
+        ## .../actions--backup.log
 
         if action in ['dumpdata', 'collectstatic', 'check-deploy']:
             try:
@@ -298,6 +299,8 @@ class Command(BaseCommand):
             LOGS_PARSED_STORAGE = '?'
             LOGS_PARSED_STORAGE__TOPS = '?'
 
+            STORAGE_FILE = f'{settings.PROJECT_LOGS_DIR}/storage.json'
+
             ## HOME_STORAGE
             cmd = run(
                 f'cd ~ && {DU_CMD} .',
@@ -399,7 +402,7 @@ class Command(BaseCommand):
             #
             dic['logs_parsed_tops'] = LOGS_PARSED_STORAGE__TOPS
 
-            with open(settings.STORAGE_FILE, 'w') as opened:
+            with open(STORAGE_FILE, 'w') as opened:
                 dumped = dumps(dic, indent=2)
                 opened.write(dumped + '\n')
         ## -----------------------------------
