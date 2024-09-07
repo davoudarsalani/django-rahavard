@@ -299,8 +299,6 @@ class Command(BaseCommand):
             LOGS_PARSED_STORAGE = '?'
             LOGS_PARSED_STORAGE__TOPS = '?'
 
-            STORAGE_FILE = f'{settings.PROJECT_LOGS_DIR}/storage.json'
-
             ## HOME_STORAGE
             cmd = run(
                 f'cd ~ && {DU_CMD} .',
@@ -402,7 +400,7 @@ class Command(BaseCommand):
             #
             dic['logs_parsed_tops'] = LOGS_PARSED_STORAGE__TOPS
 
-            with open(STORAGE_FILE, 'w') as opened:
+            with open(settings.STORAGE_FILE, 'w') as opened:
                 dumped = dumps(dic, indent=2)
                 opened.write(dumped + '\n')
         ## -----------------------------------
