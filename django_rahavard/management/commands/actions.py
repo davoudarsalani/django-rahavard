@@ -483,7 +483,7 @@ class Command(BaseCommand):
                                     rmtree(d_fullpath)
 
                 try:
-                    call_command('create-fake-logs')
+                    call_command('create-log-files-for-demo')
                 except Exception as exc:
                     log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
 
