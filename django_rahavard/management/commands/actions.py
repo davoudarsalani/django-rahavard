@@ -516,7 +516,7 @@ class Command(BaseCommand):
                     ## NOTE keep below snort
                     ('fetch-malicious', False),
                     ('parse-dns',       True),
-                    ('update-dns',      False),
+                    # ('update-dns',      False),
 
                     # ('rotate-logs', False),
                 ]
