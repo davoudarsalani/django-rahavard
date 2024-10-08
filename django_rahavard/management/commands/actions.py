@@ -78,28 +78,12 @@ class Command(BaseCommand):
         )
 
         parser.add_argument(
-            '-d',
-            '--demo',
-            default=False,
-            action='store_true',
-            help="whether it is for demo (used along with '--action=parse --batch=...')",
-        )
-
-        parser.add_argument(
-            '-c',
-            '--clean-demo',
-            default=False,
-            action='store_true',
-            help="remove everything and re-create logs before parsing (used along with '--action=parse --batch=... --demo')",
-        )
-
-        parser.add_argument(
             '-o',
             '--only',
             default=[],
             nargs='+',
             type=str,
-            help="only (used along with '--action=parse --batch=... [--demo]')",
+            help="only (used along with '--action=parse --batch=...')",
         )
 
         parser.add_argument(
@@ -108,7 +92,7 @@ class Command(BaseCommand):
             default=[],
             nargs='+',
             type=str,
-            help="exclude (used along with '--action=parse --batch=... [--demo]'). Note: it overrides -o|--only args",
+            help="exclude (used along with '--action=parse --batch=...'). Note: it overrides -o|--only args",
         )
 
     def handle(self, *args, **kwargs):
@@ -152,12 +136,10 @@ class Command(BaseCommand):
             'wipe_out':             wipe_out,
         }
 
-        action     = kwargs.get('action')
-        batch      = kwargs.get('batch')
-        demo       = kwargs.get('demo')
-        clean_demo = kwargs.get('clean_demo')
-        only       = kwargs.get('only')
-        exclude    = kwargs.get('exclude')
+        action  = kwargs.get('action')
+        batch   = kwargs.get('batch')
+        only    = kwargs.get('only')
+        exclude = kwargs.get('exclude')
 
         #############################################################
 
@@ -410,83 +392,6 @@ class Command(BaseCommand):
 
             if batch not in BATCH_OPTIONS:
                 return abort(self, 'invalid batch')
-
-            ## prepare logs for demo
-            if all([
-                settings.IS_DEMO,  ## to make sure we are on demo server
-                demo,
-                batch == 'one',
-            ]):
-                if clean_demo:
-                    ## STEP 1
-                    if path.exists(settings.LOGS_DIR):
-                        try:
-                            print(colorize(self, 'removing', f'removing {to_tilda(settings.LOGS_DIR)}'))
-                            rmtree(settings.LOGS_DIR)
-                        except Exception as exc:
-                            log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
-
-                    ## STEP 2
-                    if path.exists(settings.LOGS_PARSED_DIR):
-                        try:
-                            print(colorize(self, 'removing', f'removing directories inside {to_tilda(settings.LOGS_PARSED_DIR)} (except country)'))
-                            for d in listdir(settings.LOGS_PARSED_DIR):  ## d is base (e.g. daemon)
-                                if d == 'country':
-                                    continue
-
-                                d_fullpath = f'{settings.LOGS_PARSED_DIR}/{d}'
-                                if path.exists(d_fullpath):
-                                    print(d_fullpath)
-                                    rmtree(d_fullpath)
-                        except Exception as exc:
-                            log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
-                else:
-                    time_now = time()  ## 1719724664.241052
-                    time_n_days_ago = time_now - (MAX_FAKE_LOGS * SECONDS_PER_DAY)  ## 1718515129.1077092
-
-                    ## STEP 1
-                    source_logs = get_list_of_files(directory=settings.LOGS_DIR, extension='log')
-                    if source_logs:
-                        print(colorize(self, 'removing', f'removing logs older than {MAX_FAKE_LOGS} days'))
-                        for source_log in source_logs:
-                            ## https://stackoverflow.com/q/12485666/
-                            file_stamp = stat(source_log).st_mtime  ## 1717757735.0
-                            if file_stamp < time_n_days_ago:
-                                print(colorize(self, 'removing', f'  removing {to_tilda(source_log)}'))
-                                remove(source_log)
-
-                    ## STEP 2
-                    if path.exists(settings.LOGS_PARSED_DIR):
-                        print(colorize(self, 'removing', f'removing directories inside {to_tilda(settings.LOGS_PARSED_DIR)} older than {MAX_FAKE_LOGS} days'))
-
-                        for root, dirs, files in walk(settings.LOGS_PARSED_DIR, topdown=False):
-                            ## root = .../dhcp
-                            ## dirs = [] or ['2024-06-04', '2024-05-24', ...]
-                            ## files = []
-
-                            for d in dirs:
-                                if not is_ymd(d):
-                                    continue
-
-                                d_fullpath = f'{root}/{d}'
-
-                                if any([
-                                    not path.isdir(d_fullpath),
-                                    not contains_ymd(d_fullpath),  ## to prevent deletion of .../dns directory
-                                ]):
-                                    continue
-
-                                ## https://stackoverflow.com/a/39456407/
-                                dir_stamp = path.getmtime(d_fullpath)  ## 1719253780.286523
-                                if dir_stamp < time_n_days_ago:
-                                    print(colorize(self, 'removing', f'  removing {to_tilda(d_fullpath)}'))
-                                    rmtree(d_fullpath)
-
-                try:
-                    call_command('create-log-files-for-demo')
-                except Exception as exc:
-                    log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
-
 
             if batch == 'one':
                 rows = [
