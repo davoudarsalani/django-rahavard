@@ -5,25 +5,19 @@ from django.core.management.base import BaseCommand
 from datetime import datetime
 from getpass import getpass
 from json import dumps
-from os import listdir, path, remove, stat, walk
-from shutil import rmtree
+from os import path
 from signal import SIGINT, signal
 from subprocess import run
-from time import sleep, time
+from time import sleep
 
 from natsort import natsorted
 from rahavard import (
     DU_CMD,
-    MAX_FAKE_LOGS,
-    SECONDS_PER_DAY,
     abort,
     add_yearmonthday_firstn_lastn_wipeout,
     colorize,
-    contains_ymd,
-    is_ymd,
     get_command,
     get_command_log_file,
-    get_list_of_files,
     is_allowed,
     keyboard_interrupt_handler,
     log,
