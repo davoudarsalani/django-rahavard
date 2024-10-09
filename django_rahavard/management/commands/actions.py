@@ -406,16 +406,13 @@ class Command(BaseCommand):
                     ## NOTE keep above dhcp and dns
                     ('fetch-cidr',   False),
                     ('parse-snort',  True),
-                    ('update-snort', False),
 
                     ## NOTE keep below snort
                     ('parse-dhcp',  True),
-                    # ('update-dhcp', False),
 
                     ## NOTE keep below snort
                     ('fetch-malicious', False),
                     ('parse-dns',       True),
-                    # ('update-dns',      False),
 
                     # ('rotate-logs', False),
                 ]
