@@ -389,6 +389,8 @@ class Command(BaseCommand):
 
             if batch == 'one':
                 rows = [
+                    ('move-auto-logs',      False),
+
                     ('parse-switch',        True),
                     ('parse-windowsserver', True),
                     ('parse-daemon',        True),
@@ -403,6 +405,8 @@ class Command(BaseCommand):
                 ]
             elif batch == 'two':
                 rows = [
+                    ('move-auto-logs', False),
+
                     ## NOTE keep above dhcp and dns
                     ('fetch-cidr',   False),
                     ('parse-snort',  True),
