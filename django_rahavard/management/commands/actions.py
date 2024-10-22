@@ -43,6 +43,7 @@ ACTION_OPTIONS = [
 BATCH_OPTIONS = [
     'one',
     'two',
+    'both',
 ]
 
 
@@ -387,39 +388,40 @@ class Command(BaseCommand):
             if batch not in BATCH_OPTIONS:
                 return abort(self, 'invalid batch')
 
-            if batch == 'one':
-                rows = [
-                    ('move-auto-logs',      False),
+            rows_1 = [
+                ('parse-daemon',        True),
+                ('parse-filterlog',     True),
+                ('parse-router',        True),
+                ('parse-routerboard',   True),
+                ('parse-squid',         True),
+                ('parse-switch',        True),
+                ('parse-useraudit',     True),
+                ('parse-usernotice',    True),
+                ('parse-userwarning',   True),
+                ('parse-vmware',        True),
+                ('parse-windowsserver', True),
+            ]
 
-                    ('parse-switch',        True),
-                    ('parse-windowsserver', True),
-                    ('parse-daemon',        True),
-                    ('parse-filterlog',     True),
-                    ('parse-router',        True),
-                    ('parse-routerboard',   True),
-                    ('parse-squid',         True),
-                    ('parse-useraudit',     True),
-                    ('parse-usernotice',    True),
-                    ('parse-userwarning',   True),
-                    ('parse-vmware',        True),
-                ]
-            elif batch == 'two':
-                rows = [
-                    ('move-auto-logs', False),
+            rows_2 = [
+                ## NOTE keep above dhcp and dns
+                ('fetch-cidr',   False),
+                ('parse-snort',  True),
 
-                    ## NOTE keep above dhcp and dns
-                    ('fetch-cidr',   False),
-                    ('parse-snort',  True),
+                ## NOTE keep below snort
+                ('parse-dhcp',  True),
 
-                    ## NOTE keep below snort
-                    ('parse-dhcp',  True),
+                ## NOTE keep below snort
+                ('fetch-malicious', False),
+                ('parse-dns',       True),
 
-                    ## NOTE keep below snort
-                    ('fetch-malicious', False),
-                    ('parse-dns',       True),
+                # ('rotate-logs', False),
+            ]
 
-                    # ('rotate-logs', False),
-                ]
+            rows = [('move-auto-logs', False)]
+
+            if   batch == 'one':  rows.extend(rows_1)
+            elif batch == 'two':  rows.extend(rows_2)
+            elif batch == 'both': rows.extend(rows_1 + rows_2)
 
             ## JUMP_1
             for command_name, uses_parse_switches in rows:
