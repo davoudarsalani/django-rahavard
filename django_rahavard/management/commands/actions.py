@@ -266,33 +266,15 @@ class Command(BaseCommand):
                 elif cmd_ext_stts:
                     log(self, command, settings.HOST_NAME, ERROR_FILE, cmd_error)
         ## -----------------------------------
-        elif action == 'storage':
-            aymdhms = datetime.now().strftime('%a %Y-%m-%d %H:%M:%S')
+        if action == 'storage':
+            dic = {
+                'aymdhms': datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'),
+            }
+
+            LOGS_STORAGE  = '?'
+            MYSQL_STORAGE = '?'
 
             errors = []
-
-            HOME_STORAGE        = '?'
-            LOGS_STORAGE        = '?'
-            LOGS_PARSED_STORAGE = '?'
-            LOGS_PARSED_STORAGE__TOPS = '?'
-
-            ## HOME_STORAGE
-            cmd = run(
-                f'cd ~ && {DU_CMD} .',
-                shell=True,
-                universal_newlines=True,
-                capture_output=True,
-            )
-            cmd_output   = cmd.stdout.strip()
-            cmd_error    = cmd.stderr.strip()
-            cmd_ext_stts = cmd.returncode  ## 0/1/...
-            if not cmd_ext_stts:  ## successful
-                try:
-                    HOME_STORAGE = cmd_output.split('\t')[0]
-                except Exception as exc:
-                    errors.append(f'{exc!r}')
-            elif cmd_ext_stts:
-                errors.append(cmd_error)
 
             ## LOGS_STORAGE
             cmd = run(
@@ -312,9 +294,9 @@ class Command(BaseCommand):
             elif cmd_ext_stts:
                 errors.append(cmd_error)
 
-            ## LOGS_PARSED_STORAGE
+            ## MYSQL_STORAGE
             cmd = run(
-                f'cd {settings.LOGS_PARSED_DIR} && {DU_CMD} .',
+                f'sudo {DU_CMD} {settings.MYSQL_DATADIR}',
                 shell=True,
                 universal_newlines=True,
                 capture_output=True,
@@ -324,31 +306,11 @@ class Command(BaseCommand):
             cmd_ext_stts = cmd.returncode  ## 0/1/...
             if not cmd_ext_stts:  ## successful
                 try:
-                    LOGS_PARSED_STORAGE = cmd_output.split('\t')[0]
+                    MYSQL_STORAGE = cmd_output.split('\t')[0]
                 except Exception as exc:
                     errors.append(f'{exc!r}')
             elif cmd_ext_stts:
                 errors.append(cmd_error)
-
-
-            ## LOGS_PARSED_STORAGE__TOPS
-            cmd = run(
-                f'cd {settings.LOGS_PARSED_DIR} && {DU_CMD} * | sort -rh',
-                shell=True,
-                universal_newlines=True,
-                capture_output=True,
-            )
-            cmd_output   = cmd.stdout.strip()
-            cmd_error    = cmd.stderr.strip()
-            cmd_ext_stts = cmd.returncode  ## 0/1/...
-            if not cmd_ext_stts:  ## successful
-                try:
-                    LOGS_PARSED_STORAGE__TOPS = cmd_output
-                except Exception as exc:
-                    errors.append(f'{exc!r}')
-            elif cmd_ext_stts:
-                errors.append(cmd_error)
-
 
             if errors:
                 for error in errors:
@@ -356,26 +318,14 @@ class Command(BaseCommand):
                     sleep(.1)
 
 
-            dic = {
-                'aymdhms': aymdhms,
-                'home_section': {},
-                'logs_parsed_tops': {},
-            }
-
             ## keep bases only to prevent revealing absolute paths
             ## e.g. in each line:
             ## 5.4G /foo/bar/baz -> 5.4G baz
-            LOGS_DIR__ROOT,        LOGS_DIR__BASE        = path.split(settings.LOGS_DIR)
-            LOGS_PARSED_DIR__ROOT, LOGS_PARSED_DIR__BASE = path.split(settings.LOGS_PARSED_DIR)
+            # LOGS_DIR__ROOT,  LOGS_DIR__BASE  = path.split(settings.LOGS_DIR)
+            # MYSQL_DIR__ROOT, MYSQL_DIR__BASE = path.split(settings.MYSQL_DIR)
             #
-            dic['home_section'][HOME_STORAGE]        = '~'
-            dic['home_section'][LOGS_STORAGE]        = LOGS_DIR__BASE
-            dic['home_section'][LOGS_PARSED_STORAGE] = LOGS_PARSED_DIR__BASE
-
-            LOGS_PARSED_STORAGE__TOPS = LOGS_PARSED_STORAGE__TOPS.split('\n')  ## ['11G\tmodule', '2.1G\tgeneral', ...]
-            LOGS_PARSED_STORAGE__TOPS = dict(map(lambda item: item.split('\t'), LOGS_PARSED_STORAGE__TOPS))  ## {'11G': 'module', '2.1G': 'general', ...}
-            #
-            dic['logs_parsed_tops'] = LOGS_PARSED_STORAGE__TOPS
+            dic['logs']  = LOGS_STORAGE
+            dic['mysql'] = MYSQL_STORAGE
 
             with open(settings.STORAGE_FILE, 'w') as opened:
                 dumped = dumps(dic, indent=2)
