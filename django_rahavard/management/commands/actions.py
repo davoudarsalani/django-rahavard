@@ -338,7 +338,7 @@ class Command(BaseCommand):
             if batch not in BATCH_OPTIONS:
                 return abort(self, 'invalid batch')
 
-            rows_1 = [
+            rows_b1 = [
                 ('parse-daemon',        True),
                 ('parse-filterlog',     True),
                 ('parse-router',        True),
@@ -352,26 +352,24 @@ class Command(BaseCommand):
                 ('parse-windowsserver', True),
             ]
 
-            rows_2 = [
-                ## NOTE keep above dhcp and dns
-                ('fetch-cidr',   False),
-                ('parse-snort',  True),
-
-                ## NOTE keep below snort
-                ('parse-dhcp',  True),
+            rows_b2 = [
+                ## NOTE keep above dns/dhcp
+                ('fetch-cidr',  False),
+                ('parse-snort', True),
 
                 ## NOTE keep below snort
                 ('fetch-malicious', False),
                 ('parse-dns',       True),
-
-                # ('rotate-logs', False),
+                ('parse-dhcp',      True),
             ]
 
             rows = [('move-auto-logs', False)]
 
-            if   batch == 'one':  rows.extend(rows_1)
-            elif batch == 'two':  rows.extend(rows_2)
-            elif batch == 'both': rows.extend(rows_1 + rows_2)
+            if   batch == 'one':  rows.extend(rows_b1)
+            elif batch == 'two':  rows.extend(rows_b2)
+            elif batch == 'both': rows.extend(rows_b1 + rows_b2)
+
+            rows.append(('rotate-logs', False))
 
             ## JUMP_1
             for command_name, uses_parse_switches in rows:
@@ -388,15 +386,6 @@ class Command(BaseCommand):
         ## -----------------------------------
         elif action == 'hourly-parse':
             for command_name in [
-                ## NOTE keep above dhcp and dns
-                'hourly-parse-snort',
-
-                ## NOTE keep below snort
-                'hourly-parse-dhcp',
-
-                ## NOTE keep below snort
-                'hourly-parse-dns',
-
                 'hourly-parse-daemon',
                 'hourly-parse-filterlog',
                 'hourly-parse-router',
@@ -408,6 +397,13 @@ class Command(BaseCommand):
                 'hourly-parse-userwarning',
                 'hourly-parse-vmware',
                 'hourly-parse-windowsserver',
+
+                ## NOTE keep above dns/dhcp
+                'hourly-parse-snort',
+
+                ## NOTE keep below snort
+                'hourly-parse-dns',
+                'hourly-parse-dhcp',
             ]:
                 if not is_allowed(command_name, only, exclude):
                     continue
