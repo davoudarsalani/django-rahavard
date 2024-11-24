@@ -339,6 +339,17 @@ class Command(BaseCommand):
                 return abort(self, 'invalid batch')
 
             rows_b1 = [
+                ## NOTE keep above dns/dhcp
+                ('fetch-cidr',  False),
+                ('parse-snort', True),
+
+                ## NOTE keep below snort
+                ('fetch-malicious', False),
+                ('parse-dns',       True),
+                ('parse-dhcp',      True),
+            ]
+
+            rows_b2 = [
                 ('parse-daemon',        True),
                 ('parse-filterlog',     True),
                 ('parse-router',        True),
@@ -350,17 +361,6 @@ class Command(BaseCommand):
                 ('parse-userwarning',   True),
                 ('parse-vmware',        True),
                 ('parse-windowsserver', True),
-            ]
-
-            rows_b2 = [
-                ## NOTE keep above dns/dhcp
-                ('fetch-cidr',  False),
-                ('parse-snort', True),
-
-                ## NOTE keep below snort
-                ('fetch-malicious', False),
-                ('parse-dns',       True),
-                ('parse-dhcp',      True),
             ]
 
             rows = [('move-auto-logs', False)]
@@ -386,6 +386,13 @@ class Command(BaseCommand):
         ## -----------------------------------
         elif action == 'hourly-parse':
             for command_name in [
+                ## NOTE keep above dns/dhcp
+                'hourly-parse-snort',
+
+                ## NOTE keep below snort
+                'hourly-parse-dns',
+                'hourly-parse-dhcp',
+
                 'hourly-parse-daemon',
                 'hourly-parse-filterlog',
                 'hourly-parse-router',
@@ -397,13 +404,6 @@ class Command(BaseCommand):
                 'hourly-parse-userwarning',
                 'hourly-parse-vmware',
                 'hourly-parse-windowsserver',
-
-                ## NOTE keep above dns/dhcp
-                'hourly-parse-snort',
-
-                ## NOTE keep below snort
-                'hourly-parse-dns',
-                'hourly-parse-dhcp',
             ]:
                 if not is_allowed(command_name, only, exclude):
                     continue
