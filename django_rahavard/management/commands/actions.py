@@ -153,7 +153,7 @@ class Command(BaseCommand):
             try:
                 call_command(action)
             except Exception as exc:
-                log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
+                log(self, command, settings.HOST_NAME, ERROR_FILE, f'action={action}: {exc!r}')
         ## -----------------------------------
         elif action == 'renew':
             cmd = run(
@@ -382,7 +382,7 @@ class Command(BaseCommand):
                     else:
                         call_command(command_name)
                 except Exception as exc:
-                    log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
+                    log(self, command, settings.HOST_NAME, ERROR_FILE, f'command_name={command_name}: {exc!r}')
         ## -----------------------------------
         elif action == 'hourly-parse':
             for command_name in [
@@ -411,4 +411,4 @@ class Command(BaseCommand):
                 try:
                     call_command(command_name)
                 except Exception as exc:
-                    log(self, command, settings.HOST_NAME, ERROR_FILE, f'{exc!r}')
+                    log(self, command, settings.HOST_NAME, ERROR_FILE, f'command_name={command_name}: {exc!r}')
