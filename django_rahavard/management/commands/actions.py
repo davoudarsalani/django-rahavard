@@ -14,7 +14,7 @@ from natsort import natsorted
 from rahavard import (
     DU_CMD,
     abort,
-    add_yearmonthday_firstn_lastn_wipeout,
+    add_yearmonthday_force,
     colorize,
     get_command,
     get_command_log_file,
@@ -54,7 +54,7 @@ class Command(BaseCommand):
     help = 'Actions'
 
     def add_arguments(self, parser):
-        add_yearmonthday_firstn_lastn_wipeout(parser)
+        add_yearmonthday_force(parser, for_mysql=False)
 
         parser.add_argument(
             '-a',
@@ -100,10 +100,7 @@ class Command(BaseCommand):
         end_year_month     = kwargs.get('end_year_month')
         end_year_month_day = kwargs.get('end_year_month_day')
 
-        first_n = kwargs.get('first_n')
-        last_n  = kwargs.get('last_n')
-
-        wipe_out = kwargs.get('wipe_out')
+        force = kwargs.get('force')
 
         if year_months:     year_months     = natsorted(set(year_months))
         if year_month_days: year_month_days = natsorted(set(year_month_days))
@@ -126,9 +123,7 @@ class Command(BaseCommand):
             'start_year_month_day': start_year_month_day,
             'end_year_month':       end_year_month,
             'end_year_month_day':   end_year_month_day,
-            'first_n':              first_n,
-            'last_n':               last_n,
-            'wipe_out':             wipe_out,
+            'force':                force,
         }
 
         action  = kwargs.get('action')
@@ -351,7 +346,7 @@ class Command(BaseCommand):
 
             rows_b2 = [
                 ('parse-daemon',        True),
-                ('parse-filterlog',     True),
+                ('parse-filterlog',     True),  ## NOTE above fetch-domain-name
                 ('parse-router',        True),
                 ('parse-routerboard',   True),
                 ('parse-squid',         True),
@@ -361,6 +356,9 @@ class Command(BaseCommand):
                 ('parse-userwarning',   True),
                 ('parse-vmware',        True),
                 ('parse-windowsserver', True),
+
+                ## __TODO__ takes --no-proxy
+                # ('fetch-domain-name',   False),  ## NOTE below filterlog
             ]
 
             rows = [('move-auto-logs', False)]
