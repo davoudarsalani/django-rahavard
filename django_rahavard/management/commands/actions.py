@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 from datetime import datetime
 from getpass import getpass
 from json import dumps
-from os import path
+# from os import path
 from signal import SIGINT, signal
 from subprocess import run
 from time import sleep
@@ -21,7 +21,6 @@ from rahavard import (
     is_allowed,
     keyboard_interrupt_handler,
     log,
-    to_tilda,
 )
 
 
@@ -35,7 +34,6 @@ ACTION_OPTIONS = [
     'check-trace',
 
     ## only on log analyzer
-    'backup',
     'storage',
     'parse',
     'hourly-parse',
@@ -78,7 +76,7 @@ class Command(BaseCommand):
             default=[],
             nargs='+',
             type=str,
-            help="only (used along with '--action=parse --batch=...')",
+            help='only',
         )
 
         parser.add_argument(
@@ -87,7 +85,7 @@ class Command(BaseCommand):
             default=[],
             nargs='+',
             type=str,
-            help="exclude (used along with '--action=parse --batch=...'). Note: it overrides -o|--only args",
+            help='exclude. Note: it overrides -o|--only args',
         )
 
     def handle(self, *args, **kwargs):
@@ -142,7 +140,7 @@ class Command(BaseCommand):
         command = get_command(full_path=__file__, drop_extention=True)
 
         ERROR_FILE = get_command_log_file(f'{command}--{action}')
-        ## .../actions--backup.log
+        ## .../actions--renew.log
 
         if action in ['dumpdata', 'collectstatic', 'check-deploy']:
             try:
@@ -216,52 +214,7 @@ class Command(BaseCommand):
             elif cmd_ext_stts:
                 log(self, command, settings.HOST_NAME, ERROR_FILE, cmd_output)
         ## -----------------------------------
-        elif action == 'backup':
-            return None
-            exit()
-
-            ## check if another instance of rsync is running
-            cmd = run(
-                'pgrep "rsync"',
-                shell=True,
-                universal_newlines=True,
-                capture_output=True,
-            )  ## 4454 (if finds one, otherwise exits with exit status 1)
-            cmd_output   = cmd.stdout.strip()
-            cmd_error    = cmd.stderr.strip()
-            cmd_ext_stts = cmd.returncode  ## 0/1/...
-
-            ## rsync already running
-            if not cmd_ext_stts:
-                log(self, command, settings.HOST_NAME, ERROR_FILE, 'rsync is already running')
-                exit()
-
-            ## rsync already not running
-            else:
-                if not path.exists(settings.LOGS_DIR):
-                    log(self, command, settings.HOST_NAME, ERROR_FILE, f'{to_tilda(settings.LOGS_DIR)} does not exist')
-                    exit()
-
-                ## NOTE:
-                ##   excptionally added trailing / to settings.LOGS_DIR
-                ##   so that only its content is copied into destination
-                ##   rather than the directory itself
-                logs_dir_slashed = f'{settings.LOGS_DIR}/'
-                cmd = run(
-                    f'rsync --archive --progress --delete "{logs_dir_slashed}" "{settings.LOGS_BACKUP_DEST}"',
-                    shell=True,
-                    universal_newlines=True,
-                    capture_output=True,
-                )
-                cmd_output   = cmd.stdout.strip()
-                cmd_error    = cmd.stderr.strip()
-                cmd_ext_stts = cmd.returncode  ## 0/1/...
-                if not cmd_ext_stts:  ## successful
-                    print(cmd_output)
-                elif cmd_ext_stts:
-                    log(self, command, settings.HOST_NAME, ERROR_FILE, cmd_error)
-        ## -----------------------------------
-        if action == 'storage':
+        elif action == 'storage':
             dic = {
                 'aymdhms': datetime.now().strftime('%a %Y-%m-%d %H:%M:%S'),
             }
