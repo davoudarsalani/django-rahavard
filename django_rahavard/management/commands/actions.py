@@ -288,7 +288,6 @@ class Command(BaseCommand):
 
             rows_b1 = [
                 ## NOTE keep above dns/dhcp
-                ('fetch-cidr',  False),
                 ('parse-snort', True),
 
                 ## NOTE keep below snort
@@ -299,7 +298,7 @@ class Command(BaseCommand):
 
             rows_b2 = [
                 ('parse-daemon',        True),
-                ('parse-filterlog',     True),  ## NOTE above fetch-domain-name
+                ('parse-filterlog',     True),
                 ('parse-router',        True),
                 ('parse-routerboard',   True),
                 ('parse-squid',         True),
@@ -310,8 +309,8 @@ class Command(BaseCommand):
                 ('parse-vmware',        True),
                 ('parse-windowsserver', True),
 
-                ## __TODO__ takes --no-proxy
-                # ('fetch-domain-name',   False),  ## NOTE below filterlog
+                ## __TODO__ takes --proxy
+                # ('fetch-geolocation',   False),
             ]
 
             rows = [('move-auto-logs', False)]
