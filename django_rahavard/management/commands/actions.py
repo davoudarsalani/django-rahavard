@@ -88,6 +88,14 @@ class Command(BaseCommand):
             help='exclude. Note: it overrides -o|--only args',
         )
 
+        parser.add_argument(
+            '-p',
+            '--proxy',
+            default=False,
+            action='store_true',
+            help='Use proxy',
+        )
+
     def handle(self, *args, **kwargs):
         year_months     = kwargs.get('year_months')
         year_month_days = kwargs.get('year_month_days')
@@ -114,7 +122,7 @@ class Command(BaseCommand):
                 end_year_month_day = None
 
         ## to be used in JUMP_1
-        parse_switches = {
+        ymd__force = {
             'year_months':          year_months,
             'year_month_days':      year_month_days,
             'start_year_month':     start_year_month,
@@ -128,6 +136,7 @@ class Command(BaseCommand):
         batch   = kwargs.get('batch')
         only    = kwargs.get('only')
         exclude = kwargs.get('exclude')
+        proxy   = kwargs.get('proxy')
 
         #############################################################
 
@@ -286,51 +295,48 @@ class Command(BaseCommand):
             if batch not in BATCH_OPTIONS:
                 return abort(self, 'invalid batch')
 
-            rows_b1 = [
+            rows = [
+                ('move-auto-logs', {}),
+            ]
+
+            batch_1 = [
                 ## NOTE keep above dns/dhcp
-                ('parse-snort', True),
+                ('parse-snort', ymd__force),
 
                 ## NOTE keep below snort
-                ('fetch-malicious', False),
-                ('parse-dns',       True),
-                ('parse-dhcp',      True),
+                ('fetch-malicious', {}),
+                ('parse-dns',       ymd__force),
+                ('parse-dhcp',      ymd__force),
             ]
 
-            rows_b2 = [
-                ('parse-daemon',        True),
-                ('parse-filterlog',     True),
-                ('parse-router',        True),
-                ('parse-routerboard',   True),
-                ('parse-squid',         True),
-                ('parse-switch',        True),
-                ('parse-useraudit',     True),
-                ('parse-usernotice',    True),
-                ('parse-userwarning',   True),
-                ('parse-vmware',        True),
-                ('parse-windowsserver', True),
-
-                ## __TODO__ takes --proxy
-                # ('fetch-geolocation',   False),
+            batch_2 = [
+                ('parse-daemon',        ymd__force),
+                ('parse-filterlog',     ymd__force),
+                ('parse-router',        ymd__force),
+                ('parse-routerboard',   ymd__force),
+                ('parse-squid',         ymd__force),
+                ('parse-switch',        ymd__force),
+                ('parse-useraudit',     ymd__force),
+                ('parse-usernotice',    ymd__force),
+                ('parse-userwarning',   ymd__force),
+                ('parse-vmware',        ymd__force),
+                ('parse-windowsserver', ymd__force),
+                ('fetch-geolocation',   {'proxy': proxy}),
             ]
 
-            rows = [('move-auto-logs', False)]
+            if   batch == 'one':  rows.extend(batch_1)
+            elif batch == 'two':  rows.extend(batch_2)
+            elif batch == 'both': rows.extend(batch_1 + batch_2)
 
-            if   batch == 'one':  rows.extend(rows_b1)
-            elif batch == 'two':  rows.extend(rows_b2)
-            elif batch == 'both': rows.extend(rows_b1 + rows_b2)
-
-            rows.append(('rotate-logs', False))
+            rows.append(('rotate-logs', {}))
 
             ## JUMP_1
-            for command_name, uses_parse_switches in rows:
+            for command_name, switches in rows:
                 if not is_allowed(command_name, only, exclude):
                     continue
 
                 try:
-                    if uses_parse_switches:
-                        call_command(command_name, **parse_switches)
-                    else:
-                        call_command(command_name)
+                    call_command(command_name, **switches)
                 except Exception as exc:
                     log(self, command, settings.HOST_NAME, ERROR_FILE, f'command_name={command_name}: {exc!r}')
         ## -----------------------------------
@@ -354,6 +360,7 @@ class Command(BaseCommand):
                 'hourly-parse-userwarning',
                 'hourly-parse-vmware',
                 'hourly-parse-windowsserver',
+                ## 'fetch-geolocation',  ## needs proxy
             ]:
                 if not is_allowed(command_name, only, exclude):
                     continue
