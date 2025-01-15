@@ -341,6 +341,14 @@ class Command(BaseCommand):
                     log(self, command, settings.HOST_NAME, ERROR_FILE, f'command_name={command_name}: {exc!r}')
         ## -----------------------------------
         elif action == 'hourly-parse':
+            ## we want this option to be run
+            ## not before 5am
+            current_time = datetime.now()  ## datetime.datetime(2025, 1, 15, 12, 43, 5, 516547)
+            current_hour = current_time.hour  ## 13
+            min_hour = 5
+            if current_hour < min_hour:
+                return abort(self, f"{action} action is not allowed before {min_hour} o'clock")
+
             for command_name in [
                 ## NOTE keep above dns/dhcp
                 'hourly-parse-snort',
