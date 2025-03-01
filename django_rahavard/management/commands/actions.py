@@ -69,9 +69,10 @@ class Command(BaseCommand):
                 capture_output=True,
             )
             cmd_ext_stts = cmd.returncode  ## 0/1/...
+            cmd_output   = cmd.stdout.strip()
+            cmd_error    = cmd.stderr.strip()
+
             if cmd_ext_stts == 0:  ## successful
-                cmd_output = cmd.stdout.strip()
-                cmd_error  = cmd.stderr.strip()
                 print(cmd_output)
             elif cmd_ext_stts:
                 log(self, command, settings.HOST_NAME, log_file, cmd_error)
@@ -100,9 +101,10 @@ class Command(BaseCommand):
                 capture_output=True,
             )
             cmd_ext_stts = cmd.returncode  ## 0/1/...
+            cmd_output   = cmd.stdout.strip()
+            cmd_error    = cmd.stderr.strip()
+
             if cmd_ext_stts == 0:  ## successful
-                cmd_output = cmd.stdout.strip()
-                cmd_error  = cmd.stderr.strip()
                 # print(cmd_output)
 
                 ## NOTE 1. although the above cmd has finished successfully,
