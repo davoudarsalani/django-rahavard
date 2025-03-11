@@ -12,7 +12,7 @@ from rahavard import (
     get_command,
     get_command_log_file,
     keyboard_interrupt_handler,
-    log,
+    save_log,
 )
 
 
@@ -59,7 +59,7 @@ class Command(BaseCommand):
             try:
                 call_command(action)
             except Exception as exc:
-                log(self, command, settings.HOST_NAME, log_file, f'action={action}: {exc!r}')
+                save_log(self, command, settings.HOST_NAME, log_file, f'action={action}: {exc!r}')
         ## -----------------------------------
         elif action == 'renew':
             cmd = run(
@@ -75,7 +75,7 @@ class Command(BaseCommand):
             if cmd_ext_stts == 0:  ## successful
                 print(cmd_output)
             elif cmd_ext_stts:
-                log(self, command, settings.HOST_NAME, log_file, cmd_error)
+                save_log(self, command, settings.HOST_NAME, log_file, cmd_error)
         ## -----------------------------------
         elif action == 'update':
             gh_username = input('github username: ')
@@ -122,9 +122,9 @@ class Command(BaseCommand):
                     '(FreeBSD)'       in cmd_output,
                 ]):
                     print(colorize(self, 'error', cmd_output))
-                    log(self, command, settings.HOST_NAME, log_file, cmd_output, echo=False)
+                    save_log(self, command, settings.HOST_NAME, log_file, cmd_output, echo=False)
                 else:
                     print(colorize(self, 'success', 'Everything is safe'))
 
             elif cmd_ext_stts:
-                log(self, command, settings.HOST_NAME, log_file, cmd_output)
+                save_log(self, command, settings.HOST_NAME, log_file, cmd_output)
