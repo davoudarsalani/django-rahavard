@@ -5,6 +5,7 @@ from django.core.management.base import BaseCommand
 from getpass import getpass
 from signal import SIGINT, signal
 from subprocess import run
+from time import sleep
 
 from rahavard import (
     abort,
@@ -78,18 +79,24 @@ class Command(BaseCommand):
                 save_log(self, command, settings.HOST_NAME, log_file, cmd_error)
         ## -----------------------------------
         elif action == 'update':
-            gh_username = input('github username: ')
-            gh_token    = getpass('github token: ')
+            gh_username = input('github username: ').strip()
+            gh_token    = getpass('github token: ').strip()
 
             repo_url = f'https://{gh_username}:{gh_token}@github.com/{gh_username}/{settings.PROJECT_SLUG}.git'
             branch = 'master'
 
-            ## commands
-            git_pull       = f'git -C "{settings.PROJECT_DIR}" pull {repo_url} {branch}'
-            draw_line      = 'echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-="'
-            restart_apache = 'sudo service apache24 restart'
+            tuples = [
+                ('Fetching...',            f'git -C {settings.PROJECT_DIR} fetch {repo_url} {branch}'),
+                ('Pulling...',             f'git -C {settings.PROJECT_DIR} pull  {repo_url} {branch}'),
+                ('Restarting apache24...', 'sudo service apache24 restart'),
+            ]
 
-            run(f'{git_pull} && {draw_line} && {restart_apache}', shell=True)
+            for index, (description, cmd) in enumerate(tuples, start=1):
+                print(f'{index}/{len(tuples)} {description}')
+                run(cmd, shell=True)
+                print('-_'*30)
+                sleep(.1)
+
         ## -----------------------------------
         elif action == 'check-trace':
             cmd = run(
