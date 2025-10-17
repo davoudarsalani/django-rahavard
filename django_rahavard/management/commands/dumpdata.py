@@ -71,6 +71,10 @@ class Command(dumpdata.Command):
             # 'contenttypes',
         ]
 
+        ## ensure inactive (active=False) rows are also included
+        ## by forcing dumpdata to use the base manager
+        options['all'] = True
+
         super().handle(*args, **options)
 
 
