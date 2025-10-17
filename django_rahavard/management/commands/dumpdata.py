@@ -23,13 +23,6 @@ class Command(dumpdata.Command):
         kwargs['no_color'] = not kwargs.get('force_color', False)
         super().__init__(*args, **kwargs)
 
-    def add_arguments(self, parser):
-        super().add_arguments(parser)
-
-        ## force the use of the base manager to include all rows,
-        ## even those filtered out by default managers (like active=False)
-        parser.set_defaults(all=True)
-
     def handle(self, *args, **options):
 
         ## dump --------------
